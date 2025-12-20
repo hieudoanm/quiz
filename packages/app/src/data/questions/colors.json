@@ -1,0 +1,32 @@
+[
+  {
+    "question": "Which color is made by mixing red and blue?",
+    "answers": {
+      "red": "Green",
+      "yellow": "Purple",
+      "blue": "Orange",
+      "green": "Brown"
+    },
+    "correct": "yellow"
+  },
+  {
+    "question": "Which color is associated with the sky?",
+    "answers": {
+      "red": "Red",
+      "yellow": "Yellow",
+      "blue": "Blue",
+      "green": "Green"
+    },
+    "correct": "blue"
+  },
+  {
+    "question": "Which color represents nature and plants?",
+    "answers": {
+      "red": "Red",
+      "yellow": "Yellow",
+      "blue": "Blue",
+      "green": "Green"
+    },
+    "correct": "green"
+  }
+]
