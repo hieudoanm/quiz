@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import colorsQuestions from '@quiz/data/questions/colors.json';
 import footballQuestions from '@quiz/data/questions/football.json';
 import { shuffle } from '@quiz/utils/array';
@@ -29,11 +29,16 @@ const colorClassMap: Record<keyof QuizData['answers'], string> = {
   green: 'btn-success',
 };
 
+const QUESTION_LIMITS = [5, 10, 15];
+
 const HomePage: NextPage = () => {
   const [category, setCategory] = useState<Category>('football');
-  const [questions, setQuestions] = useState<QuizData[]>(
-    shuffle(questionsMap['football']),
+  const [limit, setLimit] = useState(10);
+
+  const [questions, setQuestions] = useState<QuizData[]>(() =>
+    shuffle(questionsMap.football).slice(0, limit),
   );
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<keyof QuizData['answers'] | null>(
     null,
@@ -43,18 +48,34 @@ const HomePage: NextPage = () => {
   const quiz = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
-  const handleSelect = useCallback(
-    (key: keyof QuizData['answers']) => {
-      if (selected) return;
+  /* ---------- derived ---------- */
 
-      setSelected(key);
+  const progress =
+    ((currentIndex + (selected ? 1 : 0)) / questions.length) * 100;
 
-      if (key === quiz.correct) {
-        setScore((s) => s + 1);
-      }
-    },
-    [selected, quiz.correct],
-  );
+  /* ---------- helpers ---------- */
+
+  const buildQuestions = (cat: Category, lim: number) =>
+    shuffle(questionsMap[cat]).slice(0, lim);
+
+  const resetQuiz = (cat = category, lim = limit) => {
+    setQuestions(buildQuestions(cat, lim));
+    setCurrentIndex(0);
+    setSelected(null);
+    setScore(0);
+  };
+
+  /* ---------- actions ---------- */
+
+  const handleSelect = (key: keyof QuizData['answers']) => {
+    if (selected) return;
+
+    setSelected(key);
+
+    if (key === quiz.correct) {
+      setScore((s) => s + 1);
+    }
+  };
 
   const handleNext = () => {
     setSelected(null);
@@ -63,11 +84,15 @@ const HomePage: NextPage = () => {
 
   const handleCategoryChange = (value: Category) => {
     setCategory(value);
-    setQuestions(shuffle(questionsMap[value]));
-    setCurrentIndex(0);
-    setSelected(null);
-    setScore(0);
+    resetQuiz(value, limit);
   };
+
+  const handleLimitChange = (value: number) => {
+    setLimit(value);
+    resetQuiz(category, value);
+  };
+
+  /* ---------- keyboard ---------- */
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -88,7 +113,10 @@ const HomePage: NextPage = () => {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [selected, handleSelect, isLastQuestion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, isLastQuestion]);
+
+  /* ---------- ui helpers ---------- */
 
   const getButtonClass = (key: keyof QuizData['answers']) => {
     if (!selected) return colorClassMap[key];
@@ -97,21 +125,59 @@ const HomePage: NextPage = () => {
     return 'btn-disabled opacity-50';
   };
 
+  /* ---------- render ---------- */
+
   return (
     <div className="bg-base-200 flex min-h-screen items-center justify-center">
       <div className="card bg-base-100 w-full max-w-md shadow-xl">
         <div className="card-body space-y-4">
-          {/* Category selector */}
-          <select
-            className="select select-bordered w-full"
-            value={category}
-            onChange={(e) => handleCategoryChange(e.target.value as Category)}>
-            <option value="colors">🎨 Colors</option>
-            <option value="football">⚽ Football</option>
-          </select>
+          {/* Controls */}
+          <div className="flex gap-2">
+            <select
+              className="select select-bordered flex-1"
+              value={category}
+              onChange={(e) =>
+                handleCategoryChange(e.target.value as Category)
+              }>
+              <option value="colors">🎨 Colors</option>
+              <option value="football">⚽ Football</option>
+            </select>
 
-          <h2 className="card-title text-center text-lg">{quiz.question}</h2>
+            <select
+              className="select select-bordered w-24"
+              value={limit}
+              onChange={(e) => handleLimitChange(Number(e.target.value))}>
+              {QUESTION_LIMITS.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </div>
 
+          {/* Progress */}
+          <div className="space-y-1">
+            <progress
+              className="progress progress-primary w-full"
+              value={progress}
+              max={100}
+            />
+            <div className="flex justify-between text-xs opacity-60">
+              <span>
+                Question {currentIndex + 1} / {questions.length}
+              </span>
+              <span>{Math.round(progress)}%</span>
+            </div>
+          </div>
+
+          {/* Question */}
+          <div className="space-y-1 text-center">
+            <h2 className="card-title justify-center text-lg">
+              {quiz.question}
+            </h2>
+          </div>
+
+          {/* Answers */}
           <div className="grid grid-cols-2 gap-3">
             {(
               Object.keys(quiz.answers) as Array<keyof QuizData['answers']>
@@ -125,12 +191,15 @@ const HomePage: NextPage = () => {
                   key,
                 )}`}
                 onClick={() => handleSelect(key)}>
-                {quiz.answers[key]}{' '}
-                <span className="opacity-60">({key[0].toUpperCase()})</span>
+                {quiz.answers[key]}
+                <span className="ml-1 opacity-60">
+                  ({key[0].toUpperCase()})
+                </span>
               </button>
             ))}
           </div>
 
+          {/* Feedback */}
           {selected && (
             <div className="alert">
               {selected === quiz.correct ? (
@@ -141,24 +210,32 @@ const HomePage: NextPage = () => {
             </div>
           )}
 
+          {/* Next */}
           {selected && !isLastQuestion && (
-            <button
-              className="btn btn-primary mt-2 w-full"
-              onClick={handleNext}>
+            <button className="btn btn-primary w-full" onClick={handleNext}>
               Next Question →
             </button>
           )}
 
+          {/* Completed */}
           {selected && isLastQuestion && (
-            <div className="mt-4 space-y-2 text-center">
+            <div className="space-y-3 text-center">
               <div className="text-lg font-semibold">🎉 Quiz completed!</div>
+
               <div>
                 Score:{' '}
                 <span className="font-bold">
                   {score} / {questions.length}
                 </span>
               </div>
-              <div className="text-sm opacity-60">
+
+              <button
+                className="btn btn-outline w-full"
+                onClick={() => resetQuiz()}>
+                🔄 Reset Quiz
+              </button>
+
+              <div className="text-xs opacity-60">
                 Keyboard: R Y B G • → Next
               </div>
             </div>
