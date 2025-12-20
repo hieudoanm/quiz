@@ -1,249 +1,164 @@
+import { Audience } from '@quiz/components/Audience';
+import { Feature } from '@quiz/components/Feature';
+import { Navbar } from '@quiz/components/Navbar';
+import { Step } from '@quiz/components/Step';
 import { NextPage } from 'next';
-import { useEffect, useState } from 'react';
-import colorsQuestions from '@quiz/data/questions/colors.json';
-import footballQuestions from '@quiz/data/questions/football.json';
-import { shuffle } from '@quiz/utils/array';
+import Link from 'next/link';
 
-type QuizData = {
-  question: string;
-  answers: {
-    red: string;
-    yellow: string;
-    blue: string;
-    green: string;
-  };
-  correct: 'red' | 'yellow' | 'blue' | 'green';
-};
-
-type Category = 'colors' | 'football';
-
-const questionsMap: Record<Category, QuizData[]> = {
-  colors: colorsQuestions as QuizData[],
-  football: footballQuestions as QuizData[],
-};
-
-const colorClassMap: Record<keyof QuizData['answers'], string> = {
-  red: 'btn-error',
-  yellow: 'btn-warning',
-  blue: 'btn-info',
-  green: 'btn-success',
-};
-
-const QUESTION_LIMITS = [5, 10, 15];
-
-const HomePage: NextPage = () => {
-  const [category, setCategory] = useState<Category>('football');
-  const [limit, setLimit] = useState(10);
-
-  const [questions, setQuestions] = useState<QuizData[]>(() =>
-    shuffle(questionsMap.football).slice(0, limit),
-  );
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selected, setSelected] = useState<keyof QuizData['answers'] | null>(
-    null,
-  );
-  const [score, setScore] = useState(0);
-
-  const quiz = questions[currentIndex];
-  const isLastQuestion = currentIndex === questions.length - 1;
-
-  /* ---------- derived ---------- */
-
-  const progress =
-    ((currentIndex + (selected ? 1 : 0)) / questions.length) * 100;
-
-  /* ---------- helpers ---------- */
-
-  const buildQuestions = (cat: Category, lim: number) =>
-    shuffle(questionsMap[cat]).slice(0, lim);
-
-  const resetQuiz = (cat = category, lim = limit) => {
-    setQuestions(buildQuestions(cat, lim));
-    setCurrentIndex(0);
-    setSelected(null);
-    setScore(0);
-  };
-
-  /* ---------- actions ---------- */
-
-  const handleSelect = (key: keyof QuizData['answers']) => {
-    if (selected) return;
-
-    setSelected(key);
-
-    if (key === quiz.correct) {
-      setScore((s) => s + 1);
-    }
-  };
-
-  const handleNext = () => {
-    setSelected(null);
-    setCurrentIndex((i) => i + 1);
-  };
-
-  const handleCategoryChange = (value: Category) => {
-    setCategory(value);
-    resetQuiz(value, limit);
-  };
-
-  const handleLimitChange = (value: number) => {
-    setLimit(value);
-    resetQuiz(category, value);
-  };
-
-  /* ---------- keyboard ---------- */
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
-
-      if (!selected) {
-        if (e.key === 'r') handleSelect('red');
-        if (e.key === 'y') handleSelect('yellow');
-        if (e.key === 'b') handleSelect('blue');
-        if (e.key === 'g') handleSelect('green');
-      }
-
-      if (selected && e.key === 'ArrowRight' && !isLastQuestion) {
-        handleNext();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected, isLastQuestion]);
-
-  /* ---------- ui helpers ---------- */
-
-  const getButtonClass = (key: keyof QuizData['answers']) => {
-    if (!selected) return colorClassMap[key];
-    if (key === quiz.correct) return 'btn-success';
-    if (key === selected) return 'btn-error';
-    return 'btn-disabled opacity-50';
-  };
-
-  /* ---------- render ---------- */
-
+const LandingPage: NextPage = () => {
   return (
-    <div className="bg-base-200 flex min-h-screen items-center justify-center">
-      <div className="card bg-base-100 w-full max-w-md shadow-xl">
-        <div className="card-body space-y-4">
-          {/* Controls */}
-          <div className="flex gap-2">
-            <select
-              className="select select-bordered flex-1"
-              value={category}
-              onChange={(e) =>
-                handleCategoryChange(e.target.value as Category)
-              }>
-              <option value="colors">🎨 Colors</option>
-              <option value="football">⚽ Football</option>
-            </select>
+    <main className="bg-base-100 text-base-content min-h-screen">
+      <Navbar />
 
-            <select
-              className="select select-bordered w-24"
-              value={limit}
-              onChange={(e) => handleLimitChange(Number(e.target.value))}>
-              {QUESTION_LIMITS.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* 1️⃣ Hero */}
+      <section className="px-6 py-24 text-center">
+        <h1 className="mb-6 text-4xl font-bold md:text-6xl">
+          Play. Create. Share Quizzes.
+        </h1>
+        <p className="mx-auto mb-10 max-w-2xl text-lg opacity-80 md:text-xl">
+          A fast, simple quiz platform for learning, fun, and friendly
+          competition.
+        </p>
 
-          {/* Progress */}
-          <div className="space-y-1">
-            <progress
-              className="progress progress-primary w-full"
-              value={progress}
-              max={100}
-            />
-            <div className="flex justify-between text-xs opacity-60">
-              <span>
-                Question {currentIndex + 1} / {questions.length}
-              </span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-          </div>
+        <Link href="/play" className="btn btn-primary btn-lg">
+          ▶️ Play Now
+        </Link>
+      </section>
 
-          {/* Question */}
-          <div className="space-y-1 text-center">
-            <h2 className="card-title justify-center text-lg">
-              {quiz.question}
-            </h2>
-          </div>
+      <div className="divider opacity-30" />
 
-          {/* Answers */}
-          <div className="grid grid-cols-2 gap-3">
-            {(
-              Object.keys(quiz.answers) as Array<keyof QuizData['answers']>
-            ).map((key) => (
-              <button
-                key={key}
-                disabled={
-                  !!selected && key !== quiz.correct && key !== selected
-                }
-                className={`btn h-20 text-white transition-all ${getButtonClass(
-                  key,
-                )}`}
-                onClick={() => handleSelect(key)}>
-                {quiz.answers[key]}
-                <span className="ml-1 opacity-60">
-                  ({key[0].toUpperCase()})
-                </span>
-              </button>
-            ))}
-          </div>
+      {/* 2️⃣ How It Works */}
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <h2 className="mb-12 text-center text-3xl font-bold">How It Works</h2>
 
-          {/* Feedback */}
-          {selected && (
-            <div className="alert">
-              {selected === quiz.correct ? (
-                <span>✅ Correct answer!</span>
-              ) : (
-                <span>❌ Wrong answer</span>
-              )}
-            </div>
-          )}
-
-          {/* Next */}
-          {selected && !isLastQuestion && (
-            <button className="btn btn-primary w-full" onClick={handleNext}>
-              Next Question →
-            </button>
-          )}
-
-          {/* Completed */}
-          {selected && isLastQuestion && (
-            <div className="space-y-3 text-center">
-              <div className="text-lg font-semibold">🎉 Quiz completed!</div>
-
-              <div>
-                Score:{' '}
-                <span className="font-bold">
-                  {score} / {questions.length}
-                </span>
-              </div>
-
-              <button
-                className="btn btn-outline w-full"
-                onClick={() => resetQuiz()}>
-                🔄 Reset Quiz
-              </button>
-
-              <div className="text-xs opacity-60">
-                Keyboard: R Y B G • → Next
-              </div>
-            </div>
-          )}
+        <div className="grid gap-8 text-center md:grid-cols-3">
+          <Step
+            title="Choose a Quiz"
+            description="Pick from sports, languages, history, geography, and more."
+          />
+          <Step
+            title="Answer Questions"
+            description="Multiple-choice questions with instant feedback."
+          />
+          <Step
+            title="See Your Score"
+            description="Track progress and replay anytime."
+          />
         </div>
-      </div>
-    </div>
+      </section>
+
+      <div className="divider opacity-30" />
+
+      {/* 3️⃣ Features */}
+      <section className="px-6 py-20">
+        <h2 className="mb-12 text-center text-3xl font-bold">Core Features</h2>
+
+        <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
+          <Feature
+            title="🎮 Play"
+            description="Jump straight into quizzes with a smooth, distraction-free experience."
+          />
+          <Feature
+            title="✍️ Create"
+            description="Create quizzes easily or upload your own data-driven questions."
+          />
+          <Feature
+            title="🔗 Share"
+            description="Share quizzes with friends, classrooms, or teams."
+          />
+        </div>
+      </section>
+
+      <div className="divider opacity-30" />
+
+      {/* 4️⃣ Categories */}
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <h2 className="mb-12 text-center text-3xl font-bold">
+          Quiz Categories
+        </h2>
+
+        <div className="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
+          {[
+            '⚽ Sports',
+            '🌍 Geography',
+            '🎾 Tennis',
+            '🏛 History',
+            '🗣 Languages',
+            '🎨 Colors',
+            '🏆 Champions',
+            '📚 General',
+          ].map((cat) => (
+            <div
+              key={cat}
+              className="card border-base-300 bg-base-100 truncate border p-6 shadow-sm">
+              {cat}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="divider opacity-30" />
+
+      {/* 5️⃣ Why */}
+      <section className="px-6 py-20">
+        <h2 className="mb-12 text-center text-3xl font-bold">
+          Why This Quiz App?
+        </h2>
+
+        <ul className="mx-auto max-w-3xl space-y-4 text-lg opacity-80">
+          <li>⚡ Fast and lightweight</li>
+          <li>⌨️ Keyboard-friendly gameplay</li>
+          <li>🔄 Replayable with shuffled questions</li>
+          <li>📂 Simple, structured quiz data</li>
+        </ul>
+      </section>
+
+      <div className="divider opacity-30" />
+
+      {/* 6️⃣ Audience */}
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <h2 className="mb-12 text-center text-3xl font-bold">
+          Built for Everyone
+        </h2>
+
+        <div className="grid gap-10 md:grid-cols-2">
+          <Audience
+            title="For Players"
+            items={['Quick quizzes', 'Track progress', 'Practice daily']}
+          />
+          <Audience
+            title="For Creators"
+            items={[
+              'Create custom quizzes',
+              'Organize by category',
+              'Share instantly',
+            ]}
+          />
+        </div>
+      </section>
+
+      <div className="divider opacity-30" />
+
+      {/* 7️⃣ CTA */}
+      <section className="px-6 py-24 text-center">
+        <h2 className="mb-6 text-4xl font-bold">Ready to start playing?</h2>
+        <p className="mb-10 text-lg opacity-80">
+          Jump into your first quiz in seconds.
+        </p>
+
+        <Link href="/play" className="btn btn-primary btn-lg">
+          ▶️ Go to Play
+        </Link>
+      </section>
+
+      <div className="divider opacity-30" />
+
+      {/* 8️⃣ Footer */}
+      <footer className="px-6 py-10 text-center text-sm opacity-60">
+        © {new Date().getFullYear()} Quiz App · Play · Create · Share
+      </footer>
+    </main>
   );
 };
 
-export default HomePage;
+export default LandingPage;

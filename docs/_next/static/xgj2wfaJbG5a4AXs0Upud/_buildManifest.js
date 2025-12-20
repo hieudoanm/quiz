@@ -1,9 +1,12 @@
 self.__BUILD_MANIFEST = {
   "/": [
-    "static/chunks/8e082eb322a11a12.js"
+    "static/chunks/c7a29e357ee34878.js"
   ],
   "/_error": [
-    "static/chunks/6b05f46af918bc89.js"
+    "static/chunks/d3ca9a931a035e2c.js"
+  ],
+  "/play": [
+    "static/chunks/d1b9caf86a4016e8.js"
   ],
   "__rewrites": {
     "afterFiles": [],
@@ -13,6 +16,7 @@ self.__BUILD_MANIFEST = {
   "sortedPages": [
     "/",
     "/_app",
-    "/_error"
+    "/_error",
+    "/play"
   ]
 };self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
