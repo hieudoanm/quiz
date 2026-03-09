@@ -1,8 +1,14 @@
 {
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file",
   "editor.formatOnType": true,
-  "java.compile.nullAnalysis.mode": "automatic",
-  "vsicons.presets.nestjs": true
+  "editor.insertSpaces": true,
+  "editor.wordWrap": "on",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
 }
