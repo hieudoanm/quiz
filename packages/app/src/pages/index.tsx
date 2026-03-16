@@ -5,7 +5,7 @@ import { Step } from '@quiz/components/Step';
 import { NextPage } from 'next';
 import Link from 'next/link';
 
-const LandingPage: NextPage = () => {
+const HomePage: NextPage = () => {
   return (
     <main className="bg-base-100 text-base-content min-h-screen">
       <Navbar />
@@ -161,4 +161,4 @@ const LandingPage: NextPage = () => {
   );
 };
 
-export default LandingPage;
+export default HomePage;
