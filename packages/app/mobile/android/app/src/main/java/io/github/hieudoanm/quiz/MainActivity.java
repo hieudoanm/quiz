@@ -1,4 +1,4 @@
-package io.github.hieudoanm.qrcode;
+package io.github.hieudoanm.quiz;
 
 import com.getcapacitor.BridgeActivity;
 
