@@ -39,6 +39,9 @@ Quiz is a focused project in this monorepo that delivers a practical tool with a
 - 💻 [CLI](https://github.com/hieudoanm/quiz/releases)
 - 📱 [Mobile](https://github.com/hieudoanm/quiz/releases)
 - 🖥️ [Desktop](https://github.com/hieudoanm/quiz/releases)
+  - 🍎 [MacOS](https://github.com/hieudoanm/quiz/releases/tag/macos-latest)
+  - 🐧 [Ubuntu](https://github.com/hieudoanm/quiz/releases/tag/ubuntu-latest)
+  - 🪟 [Windows](https://github.com/hieudoanm/quiz/releases/tag/windows-latest)
 
 ## 🛠️ 5. Development Stack
 
