@@ -14,6 +14,9 @@ self.__BUILD_MANIFEST = {
   "/app": [
     "static/chunks/0kv42xsvq4p1-.js"
   ],
+  "/downloads": [
+    "static/chunks/0_tfrdl7etihw.js"
+  ],
   "/play": [
     "static/chunks/0m0cqrtcl-sgy.js"
   ],
@@ -32,6 +35,7 @@ self.__BUILD_MANIFEST = {
     "/_app",
     "/_error",
     "/app",
+    "/downloads",
     "/play",
     "/version"
   ]
